@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Kelime Ses Kaydedici</string>
+    <string name="action_settings">Ayarlar</string>
+    <string name="action_help">Yardım</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="fragment_record_label">Record Fragment</string>
+    <string name="record_status">Kelimenin sesini kaydetmek için butona bas</string>
+</resources>
