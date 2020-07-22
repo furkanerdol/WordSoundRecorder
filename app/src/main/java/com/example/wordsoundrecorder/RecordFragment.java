@@ -10,12 +10,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.IOException;
+import java.security.Permissions;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
@@ -29,6 +32,8 @@ public class RecordFragment extends Fragment {
     private static final String RECORDING_TEXT = "Kaydediliyor...";
     private static final String COMMENT_TEXT = "Kelimenin sesini kaydetmek için butona bas";
     private static final String LOG_TAG = "SOUND_RECORDER_LOG";
+
+    private static final int PERMISSION_CODE = 1;
 
     private Button buttonStartRecord, buttonLeft, buttonRight;
     private TextView textViewRecord, textViewWord;
@@ -65,17 +70,18 @@ public class RecordFragment extends Fragment {
         textViewWord = view.findViewById(R.id.text_word);
 
         wordManager = new WordManagement(getActivity());
-        fileManager = new FileManagement();
+        fileManager = new FileManagement(getActivity(), getContext());
 
         timer = new Timer();
 
         buttonStartRecord.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (CheckPermissions()) {
+                if (checkPermissions()) {
+                    fileManager.checkFilePath();
                     mediaRecorder = new MediaRecorder();
                     mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-                    mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
+                    mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
                     mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
                     mediaRecorder.setAudioChannels(1);
                     mediaRecorder.setAudioEncodingBitRate(128000);
@@ -131,9 +137,15 @@ public class RecordFragment extends Fragment {
 
     }
 
-    public boolean CheckPermissions() {
-        int result = ContextCompat.checkSelfPermission(getActivity(), WRITE_EXTERNAL_STORAGE);
-        int result1 = ContextCompat.checkSelfPermission(getActivity(), RECORD_AUDIO);
-        return result == PackageManager.PERMISSION_GRANTED && result1 == PackageManager.PERMISSION_GRANTED;
+    public boolean checkPermissions() {
+        if (ContextCompat.checkSelfPermission(getActivity(), RECORD_AUDIO) == PackageManager.PERMISSION_DENIED
+                || ContextCompat.checkSelfPermission(getActivity(), WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(getActivity(),
+                    new String[]{RECORD_AUDIO, WRITE_EXTERNAL_STORAGE},
+                    PERMISSION_CODE);
+        } else {
+            return true;
+        }
+        return false;
     }
 }
